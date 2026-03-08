@@ -1,0 +1,638 @@
+:root {
+    --primary-color: #007AFF;
+    --primary-light: #47a1ff;
+    --text-color: #1d1d1f;
+    --text-muted: #86868b;
+    --bg-color: #ffffff;
+    --secondary-bg: #f5f5f7;
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.5);
+    --border-color: rgba(0, 0, 0, 0.05);
+    --timeline-color: var(--primary-color);
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --accent-gradient: linear-gradient(135deg, #007AFF 0%, #00C6FF 100%);
+    --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05); /* 弱化并更弥散的阴影 */
+}
+
+/* 黑夜模式变量 */
+[data-theme="dark"] {
+    --text-color: #f5f5f7;
+    --text-muted: #a1a1a6;
+    --bg-color: #000000;
+    --secondary-bg: #1c1c1e;
+    --card-bg: rgba(28, 28, 30, 0.6);
+    --glass-bg: rgba(0, 0, 0, 0.4);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --timeline-color: #ffffff;
+    --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.8;
+}
+
+/* 导航栏样式 */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 15px 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px) saturate(180%);
+    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.4s ease;
+}
+
+.navbar {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+}
+
+.logo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 35px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    opacity: 0.6;
+}
+
+.nav-links a:hover {
+    opacity: 1;
+    color: var(--primary-color);
+}
+
+/* 主题切换开关美化 */
+.theme-switch {
+    width: 46px;
+    height: 24px;
+    background: rgba(120, 120, 128, 0.1);
+    border-radius: 100px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; /* 防止被压缩 */
+}
+
+.theme-switch::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .theme-switch {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+[data-theme="dark"] .theme-switch::after {
+    transform: translateX(22px);
+    background: #007AFF;
+    box-shadow: 0 0 12px rgba(0, 122, 255, 0.6);
+}
+
+/* 首页 Hero 部分 */
+.hero-section {
+    position: relative;
+    height: auto;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.spread-container {
+    position: sticky; 
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 100px;
+    align-items: center; 
+    z-index: 10;
+    padding: 0 60px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* 移除 .spread-left 的特定样式，因为它现在是 wrapper，统一由 .spread-left, .spread-right 控制 */
+.spread-left, .spread-right {
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), opacity 0.2s ease;
+}
+
+/* 照片翻转卡片 */
+.profile-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-card-container {
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 3/4;
+    perspective: 2000px;
+    cursor: pointer;
+    position: relative;
+    z-index: 20;
+}
+
+.click-hint {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    letter-spacing: 2px;
+    font-weight: 300;
+    animation: breathe 3s infinite ease-in-out;
+    pointer-events: none; /* 防止遮挡下方可能存在的交互 */
+}
+
+@keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+.profile-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-style: preserve-3d;
+    filter: drop-shadow(var(--card-shadow));
+}
+
+.profile-card-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.profile-card-front, .profile-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 32px;
+    overflow: hidden;
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--border-color);
+}
+
+.profile-card-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-card-back {
+    transform: rotateY(180deg);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding: 40px;
+    justify-content: center;
+}
+
+/* 首页文字样式 */
+.hero-text h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    letter-spacing: -2px;
+}
+
+.highlight {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.description {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    margin-bottom: 32px; /* 减小间距，从 48px 改为 32px */
+    max-width: 520px;
+    line-height: 1.8;
+}
+
+.btn {
+    display: inline-block;
+    padding: 16px 36px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    margin-right: 16px;
+}
+
+.btn-primary {
+    background: var(--text-color);
+    color: var(--bg-color);
+}
+
+/* 时间线样式 */
+.timeline-container {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    /* 使用负 Margin 大幅拉近距离，直接消除中间的物理空白 */
+    margin-top: -30vh; 
+    padding: 40px 40px 100px 80px;
+    z-index: 5;
+    opacity: 0;
+    /* 增加 transform 过渡，实现上浮效果 */
+    transform: translateY(40px); 
+    transition: opacity 1s ease, transform 1s ease-out;
+}
+
+/* 占位符，用于撑开 hero 区域的高度，让 sticky 生效并产生滚动距离 */
+.hero-spacer {
+    display: none; /* 移除 spacer，因为我们现在靠负 Margin 来拉近距离，不需要额外的物理高度了 */
+}
+
+.timeline-line {
+    position: absolute;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, 
+        rgba(255, 255, 255, 0) 0%, 
+        var(--timeline-color) 10%, 
+        var(--timeline-color) 90%, 
+        rgba(255, 255, 255, 0) 100%);
+    opacity: 0.3;
+}
+
+.timeline-items {
+    display: flex;
+    flex-direction: column;
+    gap: 80px; /* 减小节点间距，从 120px 改为 80px */
+}
+
+.timeline-item {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    cursor: pointer;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -40px;
+    transform: translateX(-50%);
+    top: 32px;
+    width: 10px;
+    height: 10px;
+    background: var(--bg-color);
+    border: 2px solid var(--timeline-color);
+    border-radius: 50%;
+    z-index: 2;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 鼠标悬停未选中节点的 Hover 效果 */
+.timeline-item:not(.active):hover .timeline-dot {
+    background: var(--timeline-color);
+    transform: translateX(-50%) scale(1.3);
+    box-shadow: 0 0 8px var(--timeline-color);
+}
+
+.timeline-item:not(.active):hover .timeline-content {
+    opacity: 0.6; /* 提升未选中内容的透明度 */
+    transform: translateX(-10px); /* 稍微右移，增强反馈 */
+}
+
+.timeline-item:not(.active):hover .timeline-text h3 {
+    color: var(--primary-color); /* 标题变色 */
+}
+
+.timeline-content {
+    width: 100%;
+    max-width: 800px;
+    background: transparent;
+    padding: 0 24px;
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    opacity: 0.15;
+    transform: translateX(-20px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-item.active .timeline-content {
+    opacity: 1;
+    transform: translateX(0);
+    gap: 40px;
+}
+
+.timeline-item.active .timeline-dot {
+    background: var(--timeline-color);
+    border-color: var(--timeline-color);
+    transform: translateX(-50%) scale(1.6);
+    box-shadow: 0 0 15px var(--timeline-color);
+}
+
+.timeline-image {
+    flex: 0 0 0;
+    height: 140px;
+    border-radius: 20px;
+    overflow: hidden;
+    filter: grayscale(100%) opacity(0);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-item.active .timeline-image {
+    flex: 0 0 240px;
+    filter: grayscale(0%) opacity(1);
+}
+
+.timeline-text {
+    flex: 1;
+}
+
+.timeline-text h3 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* 简历与作品集卡片恢复横向排布 */
+.section { 
+    padding: 80px 40px; /* 减小板块间距，从 120px 改为 80px */
+}
+.container { 
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 0 40px;
+    box-sizing: border-box;
+}
+
+/* 简历改为 Grid 布局，不再横向滚动 */
+.resume-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+    padding: 0; /* 移除多余的内边距，使内容更紧凑 */
+    margin: 0;
+}
+
+.portfolio-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 30px;
+    overflow-x: auto;
+    padding: 20px 0 60px; /* 稍微减小作品集内边距 */
+    margin: 0; 
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* 强制包含内边距在滚动范围内 */
+    scroll-padding: 40px;
+}
+
+/* 移除之前的伪元素，改用更稳定的子元素边距方案 */
+.resume-grid::after, .portfolio-grid::after {
+    display: none;
+}
+
+/* 移除之前的 margin-right 修复 */
+.resume-item:last-child, .portfolio-card:last-child {
+    margin-right: 0; 
+}
+
+.resume-grid::-webkit-scrollbar, .portfolio-grid::-webkit-scrollbar {
+    display: none;
+}
+
+.resume-item {
+    /* flex: 0 0 380px;  移除固定宽度 */
+    width: 100%;
+    background: var(--secondary-bg);
+    padding: 40px;
+    border-radius: 32px;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    box-shadow: var(--card-shadow);
+    box-sizing: border-box;
+    height: 100%; /* 确保卡片高度一致 */
+    display: flex;
+    flex-direction: column;
+}
+
+.resume-item ul {
+    margin-top: auto; /* 列表自动到底部，使内容对齐 */
+    padding-left: 20px;
+}
+
+.resume-item:hover {
+    transform: translateY(-10px);
+    background: var(--bg-color);
+    border-color: var(--primary-color);
+}
+
+.portfolio-card {
+    /* flex: 0 0 400px;  移除原先的 400px 固定宽度 */
+    /* 调整宽度以确保在 1200px 容器内一行展示三个 */
+    /* 容器 padding 40+40=80px，可用 1120px */
+    /* gap 30px * 2 = 60px */
+    /* 剩余 1060px / 3 ≈ 353px */
+    flex: 0 0 350px; 
+    height: 420px;
+    background: transparent;
+    border-radius: 32px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    /* 优化 transition，使用更灵动的贝塞尔曲线 */
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                border-color 0.4s ease, 
+                box-shadow 0.4s ease, 
+                background-color 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+/* 作品集区域相对定位，用于放置箭头 */
+#portfolio .container {
+    position: relative;
+}
+
+.portfolio-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    opacity: 0;
+    visibility: hidden;
+}
+
+.portfolio-nav-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.portfolio-nav-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.portfolio-nav-btn.prev {
+    left: 10px;
+}
+
+.portfolio-nav-btn.next {
+    right: 10px;
+}
+
+.portfolio-nav-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.card-img {
+    height: 280px; /* 调整图片比例 */
+    background-size: cover;
+    background-position: center;
+    border-radius: 24px; /* 图片圆角 */
+    margin: 10px; /* 让图片悬浮感更强 */
+}
+
+.card-info {
+    padding: 15px 25px 25px;
+    background: transparent; /* 确保底部无背景色 */
+}
+
+.card-info h3 {
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+
+.portfolio-card:hover {
+    transform: translateY(-16px); /* 仅保留上移，稍微加大位移增强悬浮感 */
+    border-color: var(--primary-color);
+    /* 增强阴影：使用更深且扩散范围更广的阴影 */
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+    background: var(--card-bg); /* hover 时显现背景 */
+    z-index: 2; /* 确保悬浮卡片在视觉上位于最上层 */
+}
+
+.dark-section {
+    /* 移除大卡片背景和边距 */
+    background-color: transparent;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+}
+
+[data-theme="dark"] .dark-section {
+    background-color: transparent;
+}
+
+footer {
+    padding: 100px 0;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .timeline-container { padding-left: 60px; }
+    .timeline-line { left: 30px; }
+    .timeline-dot { left: -30px; }
+    .timeline-content { flex-direction: column; }
+    .timeline-image { flex: none; width: 100%; height: 200px; }
+    
+    .portfolio-grid {
+        flex-wrap: wrap; /* 移动端恢复纵向 */
+    }
+    
+    .resume-grid {
+        grid-template-columns: 1fr; /* 移动端单列 */
+    }
+
+    .resume-item, .portfolio-card {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+
